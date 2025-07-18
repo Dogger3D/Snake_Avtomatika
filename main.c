@@ -1,10 +1,12 @@
     #include <stdio.h>
     #include <windows.h>
     #include <conio.h>
+    #include <stdlib.h>
+
 //--------Player Variables-------//
     char playerName[50];
     int Score = 0;
-    char any_input = ' ';
+    char YN_input = ' ';
     char playerInput;
 //-----Game Map coordinates------//
     int Max_Rows = 24;
@@ -24,11 +26,10 @@
     int G_Over = 0;
     int i = 0;
     int piecePrinted = 0;
-    
-    
-void Game_Generation();
-void Food_Generation();
+
 void New_Game_Creation();
+void Food_Generation();
+void Game_Generation();
 void Snake_Movement();
 void Collision_detection();
 void yes_or_no();
@@ -46,19 +47,54 @@ int main() {
                     Sleep(300);
                     Collision_detection();
                     }
-                    while(G_Over == 0){
+                    while(G_Over == 1){
                         Game_Over();
                     }
         }
     return 0;
     }
 
+    void New_Game_Creation(){
+        printf("Please write your name here : ");
+        scanf_s("%s", playerName);
+        printf(" %s Welcome to my little Game!!\n", playerName);
+        printf("\n            Please choose a Difficulty\n");
+        printf("For 'Easy' please write 1  and for 'Hard' please write 2 :\n");
+        scanf_s("%d",&Difficulty);
+        system("cls");
+        Snake_X[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
+        Snake_Y[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
+        for(int l = 1 ; l < bodyLength ;l++){
+            Snake_X[l] = 0;
+            Snake_Y[l] = 0;
+        }
+        Direction = 'd';
+        Score = 0;
+        New_game = 1;
+    }
 
+
+    void Food_Generation(){
+        int illegalFood = 1;
+        while (illegalFood == 1) {
+            Food_X = rand() % (24 - 2) + 1;
+            Food_Y = rand() % (24 - 2) + 1;
+            illegalFood = 0;
+
+            for (int j = 0; j < bodyLength; j++) {
+                if (Snake_X[j] == Food_X && Snake_Y[j] == Food_Y) {
+                    illegalFood = 1;
+                    break;
+                }
+            }
+        }
+    }
 
     void Game_Generation() {
         for (Row = 0; Row <= Max_Rows; Row++) {
             for (Column = 0; Column <= Max_Columns; Column++) {
                 piecePrinted = 0;
+
                 if (Row == 0 && Column == 0) {
                     printf("◢");
                     piecePrinted = 1;
@@ -78,6 +114,16 @@ int main() {
                 else if (Row == 0 || Row == Max_Rows || Column == 0 || Column == Max_Columns) {
                     printf("◼");
                     piecePrinted = 1;
+                }
+                else if(Score == 1058){
+                    if (Row % 2 == 0 || Column % 2 == 0){
+                        printf("o");
+                    }
+                    else{
+                        printf("x");
+                    }
+                    piecePrinted = 1;
+                G_Over = 1;
                 }
                 else if (Row == Food_Y && Column == Food_X) {
                     printf("¤");
@@ -104,34 +150,6 @@ int main() {
         }
     }
 
-    void Food_Generation(){
-        int illegalFood = 1;
-        while (illegalFood == 1) {
-            Food_X = rand() % (24 - 2) + 1;
-            Food_Y = rand() % (24 - 2) + 1;
-            illegalFood = 0;
-
-            for (int j = 0; j < bodyLength; j++) {
-                if (Snake_X[j] == Food_X && Snake_Y[j] == Food_Y) {
-                    illegalFood = 1;
-                    break;
-                }
-            }
-        }
-    }
-
-    void New_Game_Creation(){
-        printf("Please write your name here : ");
-        scanf_s("%s", playerName);
-        printf(" %s Welcome to my little Game!!\n", playerName);
-        printf("\n            Please choose a Difficulty\n");
-        printf("For 'Easy' please write 1  and for 'Hard' please write 2 :\n");
-        scanf_s("%d",&Difficulty);
-        system("cls");
-        Snake_X[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
-        Snake_Y[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
-        New_game = 1;
-    }
 
 
     void Snake_Movement() {                                                                                                 // tried using other libs but in the end this one was supported by windows, and it was too much of a hustle to change up
@@ -149,7 +167,6 @@ int main() {
             Snake_X[i] = Snake_X[i - 1];
             Snake_Y[i] = Snake_Y[i - 1];
         }
-        piecePrinted = 1;
 
         switch (Direction) {                                                                                            //break resets the switch in a way of stopping other instances
             case 'w' : Snake_Y[0]--; break;
@@ -187,33 +204,40 @@ int main() {
         }
         else if (Snake_X[0] <= 0 || Snake_X[0] >= Max_Rows || Snake_Y[0] <= 0 || Snake_Y[0] >= Max_Columns) {
             New_game = 0;
-            G_Over = 0;
+            G_Over = 1;
         }
     }
 
     void yes_or_no(){
-        any_input = (char)_getch();
+        YN_input = (char)_getch();
 
     }
 
     void Game_Over(){
         system("cls");
-        printf("        Game over %s\n" , playerName);
-        printf("  Your Score was :%d\n" , Score);
+    if(Score == 1058){
+        printf("Congratulations %s\n",playerName);
+        printf("          You Won!!!\n");
+        printf("Would you like to Play Again ?\n");
+        printf("         'Y' or 'N'\n");
+    }
+    else {
+        printf("        Game over %s\n", playerName);
+        printf("  Your Score was :%d\n", Score);
         printf("Would you like to Try Again ?\n");
         printf("         'Y' or 'N'\n");
-
+    }
         yes_or_no();
 
-        if(any_input == 'Y' || any_input == 'y'){
-            system("cls");
+        if(YN_input == 'Y' || YN_input == 'y'){
             G_Over = 0;
+            system("cls");
         }
-        else if (any_input == 'N' || any_input == 'n'){
+        else if (YN_input == 'N' || YN_input == 'n'){
             printf("Good bye , %s" , playerName);
             Sleep(1000);
             Game = 0;
-            G_Over = 1;
+            G_Over = 0;
         }
         else{
             printf("Invalid input please try again.");
