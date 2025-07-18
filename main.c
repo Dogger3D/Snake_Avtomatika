@@ -23,47 +23,54 @@
     int Game = 1;
     int G_Over = 0;
     int i = 0;
-    int tailUpdate = 0;
+    int piecePrinted = 0;
 
     void Game_Border_Generation() {
         for (Row = 0; Row <= Max_Rows; Row++) {
             for (Column = 0; Column <= Max_Columns; Column++) {
+                piecePrinted = 0;
                 if (Row == 0 && Column == 0) {
                     printf("◢");
+                    piecePrinted = 1;
                 }
                 else if (Row == Max_Rows && Column == 0) {
                     printf("◥");
+                    piecePrinted = 1;
                 }
                 else if (Row == 0 && Column == Max_Columns) {
                     printf("◣");
+                    piecePrinted = 1;
                 }
                 else if (Row == Max_Rows && Column == Max_Columns) {
                     printf("◤");
+                    piecePrinted = 1;
                 }
                 else if (Row == 0 || Row == Max_Rows || Column == 0 || Column == Max_Columns) {
                     printf("◼");
+                    piecePrinted = 1;
                 }
                 else if (Row == Food_Y && Column == Food_X) {
                     printf("¤");
+                    piecePrinted = 1;
                 }
                 else if (Row == Snake_Y[0] && Column == Snake_X[0]) {
                     printf("ӫ");
+                    piecePrinted = 1;
                 }
                 else {                                                                                                  //variable was necessary to force the game gen to continue instead of stop on print or noprint
-                    tailUpdate = 0;
                     for (i = 1; i < body_length; i++) {
                         if (Snake_X[i] == Column && Snake_Y[i] == Row) {
                             printf("o");
-                            tailUpdate = 1;
+                            piecePrinted = 1;
                             break;
                         }
                     }
                 }
-                if(tailUpdate == 0){
+                if(piecePrinted == 0){
                     printf(" ");
                 }
             }
-            printf("\n");                                                                                        // End of Line beginning yof new line
+            printf("\n");                                                                                                // End of Line beginning yof new line
         }
     }
 
@@ -112,7 +119,7 @@ void Snake_Movement() {                                                         
         Snake_X[i] = Snake_X[i - 1];
         Snake_Y[i] = Snake_Y[i - 1];
     }
-    tailUpdate = 1;
+    piecePrinted = 1;
 
         switch (Direction) {                                                                                            //break resets the switch in a way of stopping other instances
         case 'w' : Snake_Y[0]--; break;
@@ -193,7 +200,7 @@ int main() {
                     system("cls");
                     Game_Border_Generation();
                     Snake_Movement();
-                    Sleep(500);
+                    Sleep(300);
                     Collision_detection();
                     }
                     while(G_Over == 0){
