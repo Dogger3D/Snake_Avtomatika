@@ -1,0 +1,204 @@
+    #include <stdio.h>
+    #include <windows.h>
+    #include <conio.h>
+//--------Player Variables-------//
+    char Player_Name[50];
+    int Score = 0;
+    char any_input = ' ';
+    char playerInput;
+//-----Game Map coordinates------//
+    int Max_Rows = 24;
+    int Max_Columns = 24;
+    int body_length = 5;                                                                                                //min is 2 (head = 1 first tail = 2)
+    int Snake_X[50] = {5};
+    int Snake_Y[50] = {5};
+    int Food_X;
+    int Food_Y;
+    int Row = 0;
+    int Column = 0;
+//--------Game Variables--------//
+    int Difficulty = 0;
+    char Direction = 'd';
+    int New_game = 0;
+    int Game = 1;
+    int G_Over = 0;
+    int i = 0;
+    int tailUpdate = 0;
+
+    void Game_Border_Generation() {
+        for (Row = 0; Row <= Max_Rows; Row++) {
+            for (Column = 0; Column <= Max_Columns; Column++) {
+                if (Row == 0 && Column == 0) {
+                    printf("◢");
+                }
+                else if (Row == Max_Rows && Column == 0) {
+                    printf("◥");
+                }
+                else if (Row == 0 && Column == Max_Columns) {
+                    printf("◣");
+                }
+                else if (Row == Max_Rows && Column == Max_Columns) {
+                    printf("◤");
+                }
+                else if (Row == 0 || Row == Max_Rows || Column == 0 || Column == Max_Columns) {
+                    printf("◼");
+                }
+                else if (Row == Food_Y && Column == Food_X) {
+                    printf("¤");
+                }
+                else if (Row == Snake_Y[0] && Column == Snake_X[0]) {
+                    printf("ӫ");
+                }
+                else {                                                                                                  //variable was necessary to force the game gen to continue instead of stop on print or noprint
+                    tailUpdate = 0;
+                    for (i = 1; i < body_length; i++) {
+                        if (Snake_X[i] == Column && Snake_Y[i] == Row) {
+                            printf("o");
+                            tailUpdate = 1;
+                            break;
+                        }
+                    }
+                }
+                if(tailUpdate == 0){
+                    printf(" ");
+                }
+            }
+            printf("\n");                                                                                        // End of Line beginning yof new line
+        }
+    }
+
+    void food_Gen(){
+        int illegalFood = 1;
+        while (illegalFood == 1) {
+            Food_X = rand() % (24 - 2) + 1;
+            Food_Y = rand() % (24 - 2) + 1;
+            illegalFood = 0;
+
+            for (int j = 0; j < body_length; j++) {
+                if (Snake_X[j] == Food_X && Snake_Y[j] == Food_Y) {
+                    illegalFood = 1;
+                    break;
+                }
+            }
+        }
+    }
+
+        void New_Game_Creation(){
+    printf("Please write your name here : ");
+    scanf_s("%s", Player_Name);
+    printf(" %s Welcome to my little Game!!\n", Player_Name);
+    printf("\n            Please choose a Difficulty\n");
+    printf("For 'Easy' please write 1  and for 'Hard' please write 2 :\n");
+    scanf_s("%d",&Difficulty);
+    system("cls");
+    Snake_X[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
+    Snake_Y[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
+    New_game = 1;
+    }
+
+
+void Snake_Movement() {                                                                                                 // tried using other libs but in the end this one was supported by windows, and it was too much of a hustle to change up
+    if (_kbhit()) {
+        playerInput = (char) _getch();                                                                                  // get character couldn't be simpler
+        while (_kbhit()) _getch();                                                                                      //added because I had issue with keys buffering and essentially blocking the game
+
+        if (playerInput == 'w' && Direction != 's' || playerInput == 's' && Direction != 'w' ||                         // filter going back into snake itself
+            playerInput == 'a' && Direction != 'd' || playerInput == 'd' && Direction != 'a') {
+            Direction = playerInput;
+        }
+    }
+
+    for (i = body_length - 1 ; i > 0; i--) {                                                                            // tail relocation | -1 because the array start at index 0 ....
+        Snake_X[i] = Snake_X[i - 1];
+        Snake_Y[i] = Snake_Y[i - 1];
+    }
+    tailUpdate = 1;
+
+        switch (Direction) {                                                                                            //break resets the switch in a way of stopping other instances
+        case 'w' : Snake_Y[0]--; break;
+        case 's' : Snake_Y[0]++; break;
+        case 'a' : Snake_X[0]--; break;
+        case 'd' : Snake_X[0]++; break;
+        default:;
+    }
+}
+    void Collision_detection() {
+        if(Snake_X[0] == Food_X && Snake_Y[0] == Food_Y){
+            body_length++;
+            Score = Score + 2;
+            food_Gen();
+        }
+        for(int k = 1 ; k < body_length ; k++){
+            if(Snake_X[0] == Snake_X[k] && Snake_Y[0] == Snake_Y[k]){
+                New_game = 0;
+                G_Over = 1;
+            }
+        }
+        if (Difficulty == 1) {
+            if(Snake_X[0] >= Max_Rows){
+                Snake_X[0] = 1;
+            }
+            if( Snake_X[0] <= 0){
+                Snake_X[0] = Max_Rows - 1;
+            }
+            if(Snake_Y[0] >= Max_Columns){
+                Snake_Y[0] = 1;
+            }
+            if(Snake_Y[0] <= 0){
+                Snake_Y[0] = Max_Columns - 1;
+            }
+        }
+        else if (Snake_X[0] <= 0 || Snake_X[0] >= Max_Rows || Snake_Y[0] <= 0 || Snake_Y[0] >= Max_Columns) {
+            New_game = 0;
+            G_Over = 0;
+        }
+    }
+
+void yes_or_no(){
+        any_input = (char)_getch();
+        
+    }
+
+void Game_Over(){
+    system("cls");
+    printf("        Game over %s\n" , Player_Name);
+    printf("  Your Score was :%d\n" , Score);
+    printf("Would you like to Try Again ?\n");
+    printf("         'Y' or 'N'\n");
+
+    yes_or_no();
+
+    if(any_input == 'Y' || any_input == 'y'){
+        system("cls");
+        G_Over = 0;
+    }
+    else if (any_input == 'N' || any_input == 'n'){
+        printf("Good bye , %s" , Player_Name);
+        Sleep(1000);
+        Game = 0;
+        G_Over = 1;
+    }
+    else{
+        printf("Invalid input please try again.");
+        Sleep(200);
+    }
+    }
+
+int main() {
+    SetConsoleOutputCP(CP_UTF8);
+        while(Game == 1){
+            New_Game_Creation();
+            food_Gen();
+                while(New_game == 1) {
+                    system("cls");
+                    Game_Border_Generation();
+                    Snake_Movement();
+                    Sleep(500);
+                    Collision_detection();
+                    }
+                    while(G_Over == 0){
+                        Game_Over();
+                    }
+        }
+    return 0;
+    }
