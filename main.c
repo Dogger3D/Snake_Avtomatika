@@ -2,14 +2,14 @@
     #include <windows.h>
     #include <conio.h>
 //--------Player Variables-------//
-    char Player_Name[50];
+    char playerName[50];
     int Score = 0;
     char any_input = ' ';
     char playerInput;
 //-----Game Map coordinates------//
     int Max_Rows = 24;
     int Max_Columns = 24;
-    int body_length = 5;                                                                                                //min is 2 (head = 1 first tail = 2)
+    int bodyLength = 5;                                                                                                 //min is 2 (head = 1 first tail = 2)
     int Snake_X[50] = {5};
     int Snake_Y[50] = {5};
     int Food_X;
@@ -24,8 +24,38 @@
     int G_Over = 0;
     int i = 0;
     int piecePrinted = 0;
+    
+    
+void Game_Generation();
+void Food_Generation();
+void New_Game_Creation();
+void Snake_Movement();
+void Collision_detection();
+void yes_or_no();
+void Game_Over();
 
-    void Game_Border_Generation() {
+int main() {
+    SetConsoleOutputCP(CP_UTF8);
+        while(Game == 1){
+            New_Game_Creation();
+            Food_Generation();
+                while(New_game == 1) {
+                    system("cls");
+                    Game_Generation();
+                    Snake_Movement();
+                    Sleep(300);
+                    Collision_detection();
+                    }
+                    while(G_Over == 0){
+                        Game_Over();
+                    }
+        }
+    return 0;
+    }
+
+
+
+    void Game_Generation() {
         for (Row = 0; Row <= Max_Rows; Row++) {
             for (Column = 0; Column <= Max_Columns; Column++) {
                 piecePrinted = 0;
@@ -58,7 +88,7 @@
                     piecePrinted = 1;
                 }
                 else {                                                                                                  //variable was necessary to force the game gen to continue instead of stop on print or noprint
-                    for (i = 1; i < body_length; i++) {
+                    for (i = 1; i < bodyLength; i++) {
                         if (Snake_X[i] == Column && Snake_Y[i] == Row) {
                             printf("o");
                             piecePrinted = 1;
@@ -74,14 +104,14 @@
         }
     }
 
-    void food_Gen(){
+    void Food_Generation(){
         int illegalFood = 1;
         while (illegalFood == 1) {
             Food_X = rand() % (24 - 2) + 1;
             Food_Y = rand() % (24 - 2) + 1;
             illegalFood = 0;
 
-            for (int j = 0; j < body_length; j++) {
+            for (int j = 0; j < bodyLength; j++) {
                 if (Snake_X[j] == Food_X && Snake_Y[j] == Food_Y) {
                     illegalFood = 1;
                     break;
@@ -90,52 +120,52 @@
         }
     }
 
-        void New_Game_Creation(){
-    printf("Please write your name here : ");
-    scanf_s("%s", Player_Name);
-    printf(" %s Welcome to my little Game!!\n", Player_Name);
-    printf("\n            Please choose a Difficulty\n");
-    printf("For 'Easy' please write 1  and for 'Hard' please write 2 :\n");
-    scanf_s("%d",&Difficulty);
-    system("cls");
-    Snake_X[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
-    Snake_Y[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
-    New_game = 1;
+    void New_Game_Creation(){
+        printf("Please write your name here : ");
+        scanf_s("%s", playerName);
+        printf(" %s Welcome to my little Game!!\n", playerName);
+        printf("\n            Please choose a Difficulty\n");
+        printf("For 'Easy' please write 1  and for 'Hard' please write 2 :\n");
+        scanf_s("%d",&Difficulty);
+        system("cls");
+        Snake_X[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
+        Snake_Y[0] = 5;                                                                                                         // reset the position of the head cause of problems when you play a new game
+        New_game = 1;
     }
 
 
-void Snake_Movement() {                                                                                                 // tried using other libs but in the end this one was supported by windows, and it was too much of a hustle to change up
-    if (_kbhit()) {
-        playerInput = (char) _getch();                                                                                  // get character couldn't be simpler
-        while (_kbhit()) _getch();                                                                                      //added because I had issue with keys buffering and essentially blocking the game
+    void Snake_Movement() {                                                                                                 // tried using other libs but in the end this one was supported by windows, and it was too much of a hustle to change up
+        if (_kbhit()) {
+            playerInput = (char) _getch();                                                                                  // get character couldn't be simpler
+            while (_kbhit()) _getch();                                                                                      //added because I had issue with keys buffering and essentially blocking the game
 
-        if (playerInput == 'w' && Direction != 's' || playerInput == 's' && Direction != 'w' ||                         // filter going back into snake itself
-            playerInput == 'a' && Direction != 'd' || playerInput == 'd' && Direction != 'a') {
-            Direction = playerInput;
+            if (playerInput == 'w' && Direction != 's' || playerInput == 's' && Direction != 'w' ||                         // filter going back into snake itself
+                playerInput == 'a' && Direction != 'd' || playerInput == 'd' && Direction != 'a') {
+                Direction = playerInput;
+            }
         }
-    }
 
-    for (i = body_length - 1 ; i > 0; i--) {                                                                            // tail relocation | -1 because the array start at index 0 ....
-        Snake_X[i] = Snake_X[i - 1];
-        Snake_Y[i] = Snake_Y[i - 1];
-    }
-    piecePrinted = 1;
+        for (i = bodyLength - 1 ; i > 0; i--) {                                                                            // tail relocation | -1 because the array start at index 0 ....
+            Snake_X[i] = Snake_X[i - 1];
+            Snake_Y[i] = Snake_Y[i - 1];
+        }
+        piecePrinted = 1;
 
         switch (Direction) {                                                                                            //break resets the switch in a way of stopping other instances
-        case 'w' : Snake_Y[0]--; break;
-        case 's' : Snake_Y[0]++; break;
-        case 'a' : Snake_X[0]--; break;
-        case 'd' : Snake_X[0]++; break;
-        default:;
+            case 'w' : Snake_Y[0]--; break;
+            case 's' : Snake_Y[0]++; break;
+            case 'a' : Snake_X[0]--; break;
+            case 'd' : Snake_X[0]++; break;
+            default:;
+        }
     }
-}
     void Collision_detection() {
         if(Snake_X[0] == Food_X && Snake_Y[0] == Food_Y){
-            body_length++;
+            bodyLength++;
             Score = Score + 2;
-            food_Gen();
+            Food_Generation();
         }
-        for(int k = 1 ; k < body_length ; k++){
+        for(int k = 1 ; k < bodyLength ; k++){
             if(Snake_X[0] == Snake_X[k] && Snake_Y[0] == Snake_Y[k]){
                 New_game = 0;
                 G_Over = 1;
@@ -161,51 +191,32 @@ void Snake_Movement() {                                                         
         }
     }
 
-void yes_or_no(){
+    void yes_or_no(){
         any_input = (char)_getch();
-        
+
     }
 
-void Game_Over(){
-    system("cls");
-    printf("        Game over %s\n" , Player_Name);
-    printf("  Your Score was :%d\n" , Score);
-    printf("Would you like to Try Again ?\n");
-    printf("         'Y' or 'N'\n");
-
-    yes_or_no();
-
-    if(any_input == 'Y' || any_input == 'y'){
+    void Game_Over(){
         system("cls");
-        G_Over = 0;
-    }
-    else if (any_input == 'N' || any_input == 'n'){
-        printf("Good bye , %s" , Player_Name);
-        Sleep(1000);
-        Game = 0;
-        G_Over = 1;
-    }
-    else{
-        printf("Invalid input please try again.");
-        Sleep(200);
-    }
-    }
+        printf("        Game over %s\n" , playerName);
+        printf("  Your Score was :%d\n" , Score);
+        printf("Would you like to Try Again ?\n");
+        printf("         'Y' or 'N'\n");
 
-int main() {
-    SetConsoleOutputCP(CP_UTF8);
-        while(Game == 1){
-            New_Game_Creation();
-            food_Gen();
-                while(New_game == 1) {
-                    system("cls");
-                    Game_Border_Generation();
-                    Snake_Movement();
-                    Sleep(300);
-                    Collision_detection();
-                    }
-                    while(G_Over == 0){
-                        Game_Over();
-                    }
+        yes_or_no();
+
+        if(any_input == 'Y' || any_input == 'y'){
+            system("cls");
+            G_Over = 0;
         }
-    return 0;
+        else if (any_input == 'N' || any_input == 'n'){
+            printf("Good bye , %s" , playerName);
+            Sleep(1000);
+            Game = 0;
+            G_Over = 1;
+        }
+        else{
+            printf("Invalid input please try again.");
+            Sleep(200);
+        }
     }
